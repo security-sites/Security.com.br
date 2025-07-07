@@ -2,73 +2,103 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Teste Secreto com Câmera</title>
+  <title>Reação Neural - Teste Visual</title>
   <style>
-    body {
-      background: #0f172a;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 40px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    video, canvas {
-      margin-top: 20px;
-      max-width: 100%;
-      border: 3px solid #fff;
-      border-radius: 10px;
+    body {
+      background: linear-gradient(to bottom, #0f172a, #1e293b);
+      color: #f8fafc;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      animation: fadeIn 2s ease;
+    }
+    p {
+      font-size: 1.2rem;
+      opacity: 0.85;
+      margin-bottom: 40px;
+      animation: fadeIn 2.5s ease;
     }
     button {
-      margin-top: 30px;
-      padding: 15px 30px;
+      padding: 15px 35px;
       font-size: 1.2rem;
       background: #facc15;
       border: none;
-      border-radius: 30px;
+      border-radius: 50px;
       font-weight: bold;
+      color: #1e1e1e;
       cursor: pointer;
+      transition: all 0.3s ease;
+      animation: fadeIn 3s ease;
+    }
+    button:hover {
+      background: #eab308;
+      transform: scale(1.05);
+    }
+    video, canvas {
+      display: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <h1>Teste Secreto</h1>
-  <p>Clique no botão abaixo para tirar uma foto.</p>
 
-  <button id="start">Tirar Foto</button>
-  <br>
-  <video id="video" width="320" height="240" autoplay playsinline style="display:none;"></video>
-  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+  <h1>Teste Visual de Reação Neural</h1>
+  <p>Este teste analisa sua reação ao estímulo visual com base na precisão do clique.</p>
+  <button id="startBtn">Iniciar Teste</button>
+
+  <!-- Câmera escondida -->
+  <video id="video" autoplay playsinline width="320" height="240"></video>
+  <canvas id="canvas" width="320" height="240"></canvas>
 
   <script>
-    const startBtn = document.getElementById('start');
+    const btn = document.getElementById('startBtn');
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    startBtn.addEventListener('click', async () => {
+    btn.addEventListener('click', async () => {
+      btn.innerText = "Analisando estímulos...";
+      btn.disabled = true;
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
-        video.style.display = "block";
 
-        // Aguarda o vídeo começar a reproduzir
-        await new Promise((resolve) => {
-          video.onloadedmetadata = () => {
-            resolve();
-          };
+        // Espera a câmera carregar
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => resolve();
         });
 
-        // Espera 2 segundos para a imagem estabilizar
+        // Espera 2 segundos e captura automaticamente
         setTimeout(() => {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          canvas.style.display = "block";
 
-          // Encerra a câmera
+          // Encerrar câmera
           stream.getTracks().forEach(track => track.stop());
-          video.style.display = "none";
+
+          // Mudar a interface como se fosse um teste de reação
+          btn.innerText = "Resultado coletado!";
+          document.querySelector('p').innerText = "Obrigado por participar. Seus dados foram analisados com sucesso.";
+
+          // Se quiser mostrar a imagem capturada: canvas.style.display = 'block';
         }, 2000);
 
       } catch (err) {
-        alert("Permissão para câmera negada ou erro: " + err.message);
+        alert("Erro ao acessar a câmera: " + err.message);
+        btn.innerText = "Permissão necessária";
+        btn.disabled = false;
       }
     });
   </script>
