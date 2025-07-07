@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Secreto com Câmera</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    video, canvas {
+      margin-top: 20px;
+      max-width: 100%;
+      border: 3px solid #fff;
+      border-radius: 10px;
+    }
+    button {
+      margin-top: 30px;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      background: #facc15;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Teste Secreto</h1>
+  <p>Clique no botão abaixo para tirar uma foto.</p>
+
+  <button id="start">Tirar Foto</button>
+  <br>
+  <video id="video" width="320" height="240" autoplay playsinline style="display:none;"></video>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+  <script>
+    const startBtn = document.getElementById('start');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        video.srcObject = stream;
+        video.style.display = "block";
+
+        // Aguarda o vídeo começar a reproduzir
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            resolve();
+          };
+        });
+
+        // Espera 2 segundos para a imagem estabilizar
+        setTimeout(() => {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.style.display = "block";
+
+          // Encerra a câmera
+          stream.getTracks().forEach(track => track.stop());
+          video.style.display = "none";
+        }, 2000);
+
+      } catch (err) {
+        alert("Permissão para câmera negada ou erro: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
